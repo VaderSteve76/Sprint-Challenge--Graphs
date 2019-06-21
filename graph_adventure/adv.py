@@ -21,7 +21,110 @@ player = Player("Name", world.startingRoom)
 
 
 # FILL THIS IN
-traversalPath = ['n', 's']
+traversalPath = []
+traversalGraph = {}
+
+class Stack:
+    def __init__(self):
+        self.stack = []
+    def push(self, value):
+        self.stack.append(value)
+    def pop(self):
+        if self.size() > 0:
+            return self.stack.pop()
+        else:
+            return None
+    def size(self):
+        return len(self.stack)
+
+stack = Stack()
+
+
+while len(traversalGraph) < 500 and len(traversalPath) < 5000:
+    currentRoom = player.currentRoom.id
+
+    print(f"Current room: {currentRoom} - Explored {len(traversalGraph)} rooms, {len(traversalPath)} steps")
+    if currentRoom not in traversalGraph: # Add room if not present in graph
+        exits = {}
+        for exit in player.currentRoom.getExits(): #  Add exit to plceholder "?"
+            exits[exit] = "?"
+        traversalGraph[currentRoom] = exits # add exits to graph
+    exits = traversalGraph[currentRoom] # get possible exits
+    print(f"Exits: {exits}")
+
+    # Go north, check currentRoom
+    if "n" in exits and exits["n"] == "?": # checking if north is unexplored, travel north, add to traversalPath
+        player.travel("n")
+        traversalPath.append("n")
+        newRoom = player.currentRoom.id
+        exits["n"] = newRoom # Set north exit to be newRoom
+        if newRoom not in traversalGraph: # add room to graph if not present
+            newRoom_exits = {} # explore room
+            for exit in player.currentRoom.getExits(): # finding exits
+                newRoom_exits[exit] = "?" 
+            newRoom_exits["s"] = currentRoom # currentRoom is set to old room
+            traversalGraph[newRoom] = newRoom_exits # add exits to room
+        else:
+            traversalGraph[newRoom]["s"] = currentRoom # setting entrance to previous room
+        stack.push("s") # add direction for backTrackDirection
+
+    # Go east, check currentRoom
+    elif "e" in exits and exits["e"] == "?": # checking if east is unexplored, travel east, add to traversalPath
+        player.travel("e")
+        traversalPath.append("e")
+        newRoom = player.currentRoom.id
+        exits["e"] = newRoom # set east exit to be newRoom
+        if newRoom not in traversalGraph: # add room to graph if not present
+            newRoom_exits = {} # explore room
+            for exit in player.currentRoom.getExits(): # finding exits
+                newRoom_exits[exit] = "?" 
+            newRoom_exits["w"] = currentRoom # currentRoom is set to old room
+            traversalGraph[newRoom] = newRoom_exits # add exits to room
+        else:
+            traversalGraph[newRoom]["w"] = currentRoom # setting entrance to previous room
+        stack.push("w") # add direction for backTrackDirection
+
+    # Go south, check currentRoom
+    elif "s" in exits and exits["s"] == "?": # checking if south is unexplored, travel south, add to traversalPath
+        player.travel("s")
+        traversalPath.append("s")
+        newRoom = player.currentRoom.id
+        exits["s"] = newRoom # set south exit to be newRoom
+        if newRoom not in traversalGraph: # add room to graph if not present
+            newRoom_exits = {} # explore room
+            for exit in player.currentRoom.getExits(): # finding exits
+                newRoom_exits[exit] = "?"
+            newRoom_exits["n"] = currentRoom # currentRoom is set to old room
+            traversalGraph[newRoom] = newRoom_exits # add exits to room
+        else:
+            traversalGraph[newRoom]["n"] = currentRoom # setting entrance to previous room
+        stack.push("n") # add direction for backTrackDirection
+
+    # Go west, check CurrentRoom
+    elif "w" in exits and exits["w"] == "?": # checking if west is unexplored, travel west, add to traversalPath
+        player.travel("w")
+        traversalPath.append("w")
+        newRoom = player.currentRoom.id
+        exits["w"] = newRoom # set west exit to be newRoom
+        if newRoom not in traversalGraph: # add room to graph if not present
+            newRoom_exits = {} # explore room
+            for exit in player.currentRoom.getExits(): # finding exits
+                newRoom_exits[exit] = "?"
+            newRoom_exits["e"] = currentRoom # currentRoom is set to old room
+            traversalGraph[newRoom] = newRoom_exits # add exits to room
+        else:
+            traversalGraph[newRoom]["e"] = currentRoom # setting entrance to previous room
+        stack.push("e") # add direction for backTrackDirection
+
+    # For when we reach a room already explored or dead end
+    else: 
+        backTrackDirection = stack.pop()
+        if backTrackDirection is None: # stop loop when no where else to go
+            break
+
+        player.travel(backTrackDirection)
+        traversalPath.append(backTrackDirection)
+
 
 
 # TRAVERSAL TEST
@@ -43,10 +146,10 @@ else:
 #######
 # UNCOMMENT TO WALK AROUND
 #######
-# player.currentRoom.printRoomDescription(player)
-# while True:
-#     cmds = input("-> ").lower().split(" ")
-#     if cmds[0] in ["n", "s", "e", "w"]:
-#         player.travel(cmds[0], True)
-#     else:
-#         print("I did not understand that command.")
+player.currentRoom.printRoomDescription(player)
+while True:
+    cmds = input("-> ").lower().split(" ")
+    if cmds[0] in ["n", "s", "e", "w"]:
+        player.travel(cmds[0], True)
+    else:
+        print("I did not understand that command.")
