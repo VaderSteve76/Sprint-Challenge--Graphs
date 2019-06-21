@@ -55,6 +55,20 @@ while len(traversalGraph) < 500 and len(traversalPath) < 5000:
             traversalPath.append('n')
             newRoom = player.currentRoom.id
             exits['n'] = newRoom
+        if newRoom not in traversalGraph:
+            newRoom_exits = {}
+            for exit in player.currentRoom.getExits():
+                newRoom_exits[exit] = '?'
+                newRoom_exits['s'] = currentRoom
+                traversalGraph[newRoom] = newRoom_exits
+        else:
+            traversalGraph[newRoom]['s'] = currentRoom
+            stack.push('s')
+    elif 'e' in exits and exits['e'] == '?':
+        player.travel('e')
+        traversalPath.append('e')
+        newRoom = player.currentRoom.id
+        exits['e'] = newRoom
 
 # TRAVERSAL TEST
 visited_rooms = set()
